@@ -872,9 +872,136 @@ canvas.chart{width:100%!important;display:block;border-radius:8px}
   display:flex;align-items:center;gap:4px;
 }
 
+
+/* ══ LOGIN SCREEN ══ */
+.login-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:28px 24px;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% 0%,rgba(74,222,128,.07),transparent 60%),
+    radial-gradient(circle at 85% 80%,rgba(96,165,250,.05),transparent 50%);
+}
+.login-overlay.hidden{display:none}
+
+.login-box{
+  width:100%;max-width:380px;
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:24px;padding:32px 28px;
+  box-shadow:0 0 60px rgba(74,222,128,.07);
+  position:relative;overflow:hidden;
+}
+.login-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+}
+.login-logo{
+  font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;text-align:center;margin-bottom:4px;
+}
+.login-tagline{
+  font-size:.78rem;color:var(--muted2);text-align:center;
+  margin-bottom:28px;
+}
+.login-label{
+  font-size:.78rem;font-weight:700;color:var(--muted2);
+  text-transform:uppercase;letter-spacing:.07em;
+  display:block;margin-bottom:7px;
+}
+.login-input{
+  width:100%;background:var(--s2);border:1px solid var(--border);
+  color:var(--text);border-radius:12px;
+  padding:12px 16px;font-size:1rem;font-family:inherit;
+  outline:none;transition:.2s;letter-spacing:.08em;
+  text-align:center;font-weight:700;
+  -webkit-text-security:disc;
+}
+.login-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(74,222,128,.1)}
+.login-btn{
+  width:100%;margin-top:12px;
+  background:linear-gradient(135deg,#22c55e,#4ade80);
+  color:#052e16;font-weight:800;font-size:.95rem;
+  padding:13px;border-radius:12px;border:none;cursor:pointer;
+  transition:.2s;font-family:inherit;
+  box-shadow:0 6px 20px rgba(74,222,128,.25);
+}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(74,222,128,.35)}
+.login-error{
+  display:none;
+  background:rgba(255,110,110,.1);border:1px solid rgba(255,110,110,.2);
+  border-radius:10px;padding:10px 14px;
+  font-size:.8rem;color:var(--coral);text-align:center;margin-top:10px;
+}
+.login-error.show{display:block}
+.login-divider{
+  display:flex;align-items:center;gap:10px;margin:18px 0 14px;
+}
+.login-divider span{height:1px;flex:1;background:var(--border)}
+.login-divider p{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.login-access-btn{
+  width:100%;background:var(--s2);border:1px solid var(--border);
+  color:var(--muted2);font-size:.82rem;font-weight:600;
+  padding:11px;border-radius:12px;cursor:pointer;
+  transition:.2s;font-family:inherit;text-align:center;
+  text-decoration:none;display:block;
+}
+.login-access-btn:hover{border-color:var(--green);color:var(--green)}
+.login-week-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.15);
+  color:var(--blue);border-radius:20px;
+  padding:3px 10px;font-size:.68rem;font-weight:700;
+  margin-bottom:18px;
+}
+.login-footer{
+  font-size:.68rem;color:var(--muted);text-align:center;margin-top:16px;
+}
+
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">Transformación 360°</div>
+    <div class="login-tagline">Tu cuerpo · Tu mente · Tu vida</div>
+
+    <span class="login-label">Tu código de acceso</span>
+    <input
+      class="login-input"
+      type="password"
+      id="loginInput"
+      placeholder="••••••••••"
+      autocapitalize="none"
+      autocorrect="off"
+      autocomplete="off"
+      spellcheck="false"
+      onkeydown="if(event.key==='Enter')checkAccess()"
+    >
+    <div class="login-error" id="loginError">
+      ❌ Código incorrecto. Verificá y volvé a intentar.
+    </div>
+    <button class="login-btn" onclick="checkAccess()">
+      Ingresar ✨
+    </button>
+
+    <div class="login-divider">
+      <span></span><p>¿No tenés código?</p><span></span>
+    </div>
+    <a href="https://pay.hotmart.com/D105556941J" class="login-access-btn" target="_blank">
+      🌟 Obtené tu acceso completo →
+    </a>
+
+    <div class="login-footer">
+      © 2026 Transformación 360° · Todos los derechos reservados
+    </div>
+  </div>
+</div>
 
 <!-- HEADER -->
 <header class="hdr">
@@ -2881,23 +3008,154 @@ function setDiet(diet) {
 // MEDITATIONS
 // ══════════════════════════
 const meditations = [
-  { ico:'🌅', name:'Activación matutina', dur:'5 min', desc:'Energiza tu cuerpo y mente para empezar el día con intención', color:'var(--ad)' },
-  { ico:'😮‍💨', name:'Reducción de estrés', dur:'8 min', desc:'Técnica de relajación profunda para calmar el sistema nervioso', color:'var(--vd)' },
-  { ico:'🧘', name:'Body scan', dur:'10 min', desc:'Conciencia plena del cuerpo, libera tensiones acumuladas', color:'var(--bd)' },
-  { ico:'🌙', name:'Para antes de dormir', dur:'7 min', desc:'Prepara tu mente para un sueño profundo y restaurador', color:'var(--gd)' },
-  { ico:'💆', name:'Manejo de ansiedad', dur:'6 min', desc:'Ancla tu mente en el presente, reduce pensamientos acelerados', color:'var(--cd)' },
+  { ico:'🌅', name:'Activación matutina', dur:'5 min', desc:'Energiza tu cuerpo y mente para empezar el día con intención', color:'var(--ad)',
+    script: [
+      { text: 'Cerrá los ojos suavemente. Respirá profundo. Hoy es un nuevo día lleno de posibilidades.', pause: 5000 },
+      { text: 'Inhalá lentamente por la nariz... contando 1, 2, 3, 4...', pause: 4000 },
+      { text: 'Mantené el aire... 1, 2, 3...', pause: 3000 },
+      { text: 'Exhalá despacio por la boca... soltando toda la tensión de la noche.', pause: 5000 },
+      { text: 'Sentí tu cuerpo despertando. Mové suavemente los dedos de las manos y los pies.', pause: 5000 },
+      { text: 'Hoy elegís moverte. Hoy elegís nutrirte. Hoy elegís cuidarte.', pause: 5000 },
+      { text: 'Repetí internamente: Soy capaz. Soy fuerte. Mi transformación empieza hoy.', pause: 6000 },
+      { text: 'Respirá profundo una vez más... y cuando estés lista, abrí los ojos con energía. ¡Buenos días! 🌅', pause: 4000 },
+    ]
+  },
+  { ico:'😮‍💨', name:'Reducción de estrés', dur:'8 min', desc:'Técnica de relajación profunda para calmar el sistema nervioso', color:'var(--vd)',
+    script: [
+      { text: 'Bienvenida. Este es tu momento de pausa. Todo lo demás puede esperar.', pause: 5000 },
+      { text: 'Cerrá los ojos. Soltá los hombros hacia abajo. Dejá que tu mandíbula se relaje.', pause: 6000 },
+      { text: 'Vamos a respirar juntas. Inhalá por la nariz en 4 tiempos... 1, 2, 3, 4...', pause: 5000 },
+      { text: 'Mantené suavemente... 1, 2, 3, 4...', pause: 4000 },
+      { text: 'Exhalá lentamente por la boca en 6 tiempos... 1, 2, 3, 4, 5, 6... soltando el estrés.', pause: 7000 },
+      { text: 'Cada vez que exhalás, el estrés sale de tu cuerpo. Tu sistema nervioso se calma.', pause: 5000 },
+      { text: 'Inhalá paz... exhalá tensión. Inhalá calma... exhalá preocupación.', pause: 8000 },
+      { text: 'Tu cuerpo sabe cómo descansar. Solo necesitaba este permiso.', pause: 6000 },
+      { text: 'Repetí estas tres veces: Estoy segura. Estoy en calma. Todo está bien.', pause: 7000 },
+      { text: 'Quedáte en silencio unos momentos más... y cuando sientas que estás lista, volvé suavemente.', pause: 5000 },
+    ]
+  },
+  { ico:'🧘', name:'Body scan', dur:'10 min', desc:'Conciencia plena del cuerpo, libera tensiones acumuladas', color:'var(--bd)',
+    script: [
+      { text: 'Recostáte o sentáte cómodamente. Esta meditación es un viaje por tu cuerpo.', pause: 5000 },
+      { text: 'Cerrá los ojos. Respirá naturalmente. Solo observá.', pause: 5000 },
+      { text: 'Llevá tu atención a los pies. ¿Los sentís tensos o relajados? Solo observá sin juzgar.', pause: 7000 },
+      { text: 'Ahora las pantorrillas y las rodillas. Soltá cualquier tensión que encuentres ahí.', pause: 7000 },
+      { text: 'Subí hasta los muslos y las caderas. Esta zona guarda mucho estrés. Respirá y soltá.', pause: 8000 },
+      { text: 'El abdomen. Sentí cómo sube y baja con cada respiración. Relajá los músculos del centro.', pause: 7000 },
+      { text: 'El pecho y el corazón. Gracias a este corazón que late por vos cada segundo.', pause: 7000 },
+      { text: 'Los hombros, el cuello. Soltá. Esta es la zona donde más cargamos el peso del día.', pause: 7000 },
+      { text: 'La cara. Relajá la frente, los ojos, la mandíbula. No necesitás sostener nada ahora.', pause: 7000 },
+      { text: 'Tu cuerpo entero está relajado. Sos una sola con tu respiración. Quedáte aquí un momento.', pause: 8000 },
+      { text: 'Cuando estés lista, mové suavemente los dedos, estirá, y abrí los ojos. Muy bien hecho. 🧘', pause: 5000 },
+    ]
+  },
+  { ico:'🌙', name:'Para antes de dormir', dur:'7 min', desc:'Prepara tu mente para un sueño profundo y restaurador', color:'var(--gd)',
+    script: [
+      { text: 'Es momento de soltar el día. Todo lo que hiciste hoy fue suficiente.', pause: 5000 },
+      { text: 'Acomodate cómodamente en tu cama. Cerrá los ojos suavemente.', pause: 5000 },
+      { text: 'Pensá en una cosa por la que estés agradecida hoy. Solo una pequeña cosa.', pause: 7000 },
+      { text: 'Respirá profundo... y con la exhalación, soltá cualquier preocupación de mañana.', pause: 6000 },
+      { text: 'El mañana se encarga solo. Esta noche, solo necesitás descansar.', pause: 6000 },
+      { text: 'Sentí el peso de tu cuerpo hundiéndose en la cama. Estás segura. Estás protegida.', pause: 7000 },
+      { text: 'Cada respiración te lleva más profundo hacia el descanso. Más profundo... más tranquila...', pause: 8000 },
+      { text: 'Dulces sueños. Tu cuerpo se repara esta noche. Mañana amanecés más fuerte. 🌙', pause: 5000 },
+    ]
+  },
+  { ico:'💆', name:'Manejo de ansiedad', dur:'6 min', desc:'Ancla tu mente en el presente, reduce pensamientos acelerados', color:'var(--cd)',
+    script: [
+      { text: 'La ansiedad es una señal de que tu mente está en el futuro. Vamos a traerla al presente.', pause: 6000 },
+      { text: 'Mirá a tu alrededor. Nombrá mentalmente 5 cosas que podés ver ahora mismo.', pause: 8000 },
+      { text: 'Ahora 4 cosas que podés tocar. Sentí la textura de lo que tenés cerca.', pause: 7000 },
+      { text: 'Escuchá 3 sonidos en tu entorno. No los juzgues, solo escuchalos.', pause: 7000 },
+      { text: 'Identificá 2 cosas que podés oler ahora. Si no hay nada, respirá el aire que te rodea.', pause: 6000 },
+      { text: 'Una cosa que podés saborear. Este es el momento presente. Estás aquí. Estás bien.', pause: 6000 },
+      { text: 'La ansiedad disminuye cuando volvemos al ahora. Respirá. Estás a salvo en este momento.', pause: 7000 },
+      { text: 'Seguí respirando profundo. Sos más fuerte que cualquier pensamiento que te asusta. 💆', pause: 5000 },
+    ]
+  },
 ];
 function renderMeditations() {
-  $('meditationList').innerHTML = meditations.map(m => `
-    <div class="ex-card">
+  $('meditationList').innerHTML = meditations.map((m, i) => `
+    <div class="ex-card" id="medCard${i}">
       <div class="ex-ico" style="background:${m.color}">${m.ico}</div>
       <div class="ex-detail">
         <h4>${m.name} <span style="font-size:.7rem;color:var(--muted2)">${m.dur}</span></h4>
         <p>${m.desc}</p>
+        <div id="medStatus${i}" style="font-size:.74rem;color:var(--muted2);margin-top:4px;display:none"></div>
       </div>
-      <button class="btn btn-sm btn-outline" onclick="showToast('🧘 Iniciando meditación...')">▶</button>
+      <button class="btn btn-sm btn-outline" id="medBtn${i}" onclick="toggleMeditation(${i})">▶</button>
     </div>
   `).join('');
+}
+
+// ── MEDITATION ENGINE ──
+let medActive = null, medTimeout = null, medUtterance = null;
+
+function toggleMeditation(idx) {
+  if (medActive === idx) {
+    stopMeditation();
+    return;
+  }
+  if (medActive !== null) stopMeditation();
+  startMeditation(idx);
+}
+
+function stopMeditation() {
+  if (medTimeout) clearTimeout(medTimeout);
+  if (medUtterance) speechSynthesis.cancel();
+  if (medActive !== null) {
+    const btn = $('medBtn' + medActive);
+    const status = $('medStatus' + medActive);
+    if (btn) { btn.textContent = '▶'; btn.style.background = ''; }
+    if (status) { status.style.display = 'none'; status.textContent = ''; }
+  }
+  medActive = null; medTimeout = null; medUtterance = null;
+}
+
+function startMeditation(idx) {
+  if (!('speechSynthesis' in window)) {
+    showToast('⚠️ Tu navegador no soporta voz. Usá Chrome.');
+    return;
+  }
+  medActive = idx;
+  const btn = $('medBtn' + idx);
+  const status = $('medStatus' + idx);
+  if (btn) { btn.textContent = '⏹'; btn.style.background = 'var(--coral)'; }
+  if (status) { status.style.display = 'block'; }
+  showToast('🧘 Iniciando meditación... subí el volumen');
+  runMeditationStep(idx, 0);
+}
+
+function runMeditationStep(idx, step) {
+  const med = meditations[idx];
+  if (!med || step >= med.script.length || medActive !== idx) {
+    stopMeditation();
+    showToast('🧘 Meditación completada · ¡Muy bien hecho!');
+    return;
+  }
+  const item = med.script[step];
+  const status = $('medStatus' + idx);
+  if (status) status.textContent = '🔊 ' + item.text;
+
+  speechSynthesis.cancel();
+  medUtterance = new SpeechSynthesisUtterance(item.text);
+  medUtterance.lang = 'es-AR';
+  medUtterance.rate = 0.82;
+  medUtterance.pitch = 1.0;
+  medUtterance.volume = 1.0;
+
+  // Pick a soft Spanish female voice if available
+  const voices = speechSynthesis.getVoices();
+  const esVoice = voices.find(v => v.lang.startsWith('es') && v.name.toLowerCase().includes('female'))
+    || voices.find(v => v.lang.startsWith('es'))
+    || null;
+  if (esVoice) medUtterance.voice = esVoice;
+
+  medUtterance.onend = () => {
+    if (medActive !== idx) return;
+    medTimeout = setTimeout(() => runMeditationStep(idx, step + 1), item.pause * 0.4);
+  };
+  speechSynthesis.speak(medUtterance);
 }
 
 // ══════════════════════════
@@ -4395,6 +4653,57 @@ if (typeof ALL_LS_KEYS !== 'undefined') {
     if (!ALL_LS_KEYS.includes(k)) ALL_LS_KEYS.push(k);
   });
 }
+
+
+// ══════════════════════════════════════
+// ACCESS CONTROL
+// ══════════════════════════════════════
+
+// Permanent code for buyers (Hotmart & direct sales)
+// Disguised as wellness activation code
+const ACTIVATION_CODE = "VIDA360";
+
+// Weekly rotating code for demos
+// Formula: "BIENESTAR" + week number + last 2 digits of year
+// e.g. week 18, 2026 = BIENESTAR1826
+function getWeeklyCode() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  const week = Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7);
+  const yr = String(now.getFullYear()).slice(-2);
+  return 'BIENESTAR' + String(week).padStart(2,'0') + yr;
+}
+
+function checkAccess() {
+  const input = document.getElementById('loginInput').value.trim().toUpperCase();
+  const error = document.getElementById('loginError');
+
+  if (
+    input === ACTIVATION_CODE.toUpperCase() ||
+    input === getWeeklyCode().toUpperCase()
+  ) {
+    // Save access so they don't need to re-enter on same device
+    try { localStorage.setItem('t360_access', 'granted'); } catch(e){}
+    document.getElementById('loginOverlay').classList.add('hidden');
+    error.classList.remove('show');
+    showToast('¡Bienvenida a tu Transformación 360°! 🌟');
+  } else {
+    error.classList.add('show');
+    document.getElementById('loginInput').value = '';
+    document.getElementById('loginInput').focus();
+  }
+}
+
+function checkStoredAccess() {
+  try {
+    if (localStorage.getItem('t360_access') === 'granted') {
+      document.getElementById('loginOverlay').classList.add('hidden');
+    }
+  } catch(e) {}
+}
+
+// Run on load
+checkStoredAccess();
 
 document.addEventListener('DOMContentLoaded', () => {
   init();
