@@ -3319,6 +3319,7 @@ function addFoodEntry() {
   LS.set('foodLogToday', foodLog);
   $('foodName').value = ''; $('foodKcal').value = ''; if ($('foodQuantity')) $('foodQuantity').value = 1; if ($('foodPortion')) $('foodPortion').value = '1';
   renderFoodLog();
+  saveTodayToHistory();
   markDailyAction('food');
   showToast(`🍽️ ${name} registrado · ${kcal} kcal`);
 }
@@ -3327,12 +3328,15 @@ function deleteFoodEntry(id) {
   foodLog.entries = foodLog.entries.filter(e => e.id !== id);
   LS.set('foodLogToday', foodLog);
   renderFoodLog();
+  saveTodayToHistory();
 }
 
 function clearFoodLog() {
   foodLog.entries = [];
   LS.set('foodLogToday', foodLog);
   renderFoodLog();
+  updateHomeStats();
+  saveTodayToHistory();
 }
 
 function renderFoodLog() {
@@ -3376,7 +3380,17 @@ const exKcalPerMin = { suave: 4, moderada: 7, intensa: 11 }; // rough kcal/min e
 let exLog = LS.get('exLogToday') || { date:'', entries:[] };
 function checkExLogDate() {
   const today = new Date().toISOString().split('T')[0];
-  if (exLog.date !== today) { exLog = { date: today, entries:[] }; LS.set('exLogToday', exLog); }
+  if (exLog.date !== today) {
+    exLog = { date: today, entries:[] };
+    LS.set('exLogToday', exLog);
+    // New day: reset calorie burned counter
+    calBurned = 0;
+    LS.set('calBurned', 0);
+    if ($('calDisplay')) $('calDisplay').textContent = 0;
+    if ($('calBar')) $('calBar').style.width = '0%';
+    if ($('homeCalCount')) $('homeCalCount').textContent = 0;
+    if ($('homeCalBar')) $('homeCalBar').style.width = '0%';
+  }
 }
 
 function quickEx(name, dur, intensity) {
@@ -3400,6 +3414,7 @@ function addExEntry() {
   LS.set('exLogToday', exLog);
   $('exName').value = ''; $('exDuration').value = ''; $('exSeries').value = '';
   renderExLog();
+  saveTodayToHistory();
   // Also add to calorie counter
   addCal(kcal);
   markDailyAction('movement');
@@ -3412,12 +3427,21 @@ function deleteExEntry(id) {
   exLog.entries = exLog.entries.filter(e => e.id !== id);
   LS.set('exLogToday', exLog);
   renderExLog();
+  saveTodayToHistory();
 }
 
 function clearExLog() {
   exLog.entries = [];
   LS.set('exLogToday', exLog);
+  // Reset calorie burned counter completely
+  calBurned = 0;
+  LS.set('calBurned', 0);
+  if ($('calDisplay')) $('calDisplay').textContent = 0;
+  if ($('calBar')) $('calBar').style.width = '0%';
+  if ($('homeCalCount')) $('homeCalCount').textContent = 0;
+  if ($('homeCalBar')) $('homeCalBar').style.width = '0%';
   renderExLog();
+  saveTodayToHistory();
 }
 
 function renderExLog() {
@@ -4169,12 +4193,13 @@ function setupCanvas(id) {
   const canvas = document.getElementById(id);
   if (!canvas) return null;
   const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const w = Math.floor(rect.width) || 340;
+  // Use the canvas's own offsetWidth (respects parent padding & CSS width:100%)
+  // Fall back to parent rect width, then to 340 if tab is still hidden
+  const w = canvas.offsetWidth || Math.floor(canvas.parentElement.getBoundingClientRect().width) || 340;
   const h = parseInt(canvas.getAttribute('height')) || 160;
   canvas.width = w * dpr;
   canvas.height = h * dpr;
-  canvas.style.width = w + 'px';
+  // Do NOT override width via style — CSS width:100% on canvas.chart handles it correctly
   canvas.style.height = h + 'px';
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
@@ -4478,7 +4503,7 @@ const _origSwitchTab = switchTab;
 document.addEventListener('click', e => {
   const btn = e.target.closest('.bnav-btn');
   if (btn && btn.getAttribute('onclick')?.includes('progreso')) {
-    setTimeout(renderAllCharts, 50);
+    setTimeout(renderAllCharts, 120);
   }
 });
 
