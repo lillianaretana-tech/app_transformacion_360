@@ -698,6 +698,7 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
 .chart-container{
   background:var(--s2);border:1px solid var(--border);
   border-radius:var(--r);padding:16px;margin-bottom:12px;
+  overflow:hidden;
 }
 .chart-header{
   display:flex;align-items:center;justify-content:space-between;
@@ -2167,14 +2168,21 @@ const LS = {
 // ══════════════════════════
 // ENGAGEMENT: STREAK + DAILY MISSION
 // ══════════════════════════
+function localDateStr(d) {
+  d = d || new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
 function todayKey() {
-  return new Date().toISOString().split('T')[0];
+  return localDateStr();
 }
 
 function yesterdayKey() {
   const d = new Date();
   d.setDate(d.getDate() - 1);
-  return d.toISOString().split('T')[0];
+  return localDateStr(d);
 }
 
 function getStreakData() {
@@ -3164,7 +3172,7 @@ function runMeditationStep(idx, step) {
 function saveJournal() {
   const text = $('journalText').value.trim();
   if (!text) return;
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
   const journals = LS.get('journals') || {};
   journals[today] = text;
   LS.set('journals', journals);
@@ -3293,7 +3301,7 @@ function estimateFoodKcal(name) {
 
 let foodLog = LS.get('foodLogToday') || { date:'', entries:[] };
 function checkFoodLogDate() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
   if (foodLog.date !== today) { foodLog = { date: today, entries:[] }; LS.set('foodLogToday', foodLog); }
 }
 
@@ -3379,7 +3387,7 @@ const exKcalPerMin = { suave: 4, moderada: 7, intensa: 11 }; // rough kcal/min e
 
 let exLog = LS.get('exLogToday') || { date:'', entries:[] };
 function checkExLogDate() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
   if (exLog.date !== today) {
     exLog = { date: today, entries:[] };
     LS.set('exLogToday', exLog);
@@ -3817,7 +3825,7 @@ function exportProfile() {
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
 
-  const date = new Date().toISOString().split('T')[0];
+  const date = localDateStr();
   const name = (profile.name || 'mi-perfil').toLowerCase().replace(/\s+/g, '-');
   const filename = `transformacion360-${name}-${date}.json`;
 
@@ -3980,7 +3988,7 @@ function logWeight() {
   const val = parseFloat(document.getElementById('todayWeight')?.value);
   if (!val || val < 20 || val > 300) { showToast('⚠️ Peso inválido'); return; }
   const log = getWeightLog();
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
   // Update or push today's entry
   const idx = log.findIndex(e => e.date === today);
   if (idx >= 0) log[idx].kg = val;
@@ -4084,7 +4092,7 @@ function generateDemoHistory() {
     d.setDate(d.getDate() - i);
     const noise = (Math.random() - 0.4) * 0.4;
     const trend = i * 0.04;
-    demo.push({ date: d.toISOString().split('T')[0], kg: parseFloat((startWeight + trend + noise).toFixed(1)) });
+    demo.push({ date: localDateStr(d), kg: parseFloat((startWeight + trend + noise).toFixed(1)) });
   }
   if (wLog.length) { // keep today's real entry
     demo.push(...wLog);
@@ -4101,7 +4109,7 @@ function getCalHistory(days) {
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().split('T')[0];
+    const key = localDateStr(d);
     const dayOfWeek = d.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     result.push({
@@ -4121,7 +4129,7 @@ function getHabitHistory(days) {
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().split('T')[0];
+    const key = localDateStr(d);
     result.push({
       date: key,
       label: d.toLocaleDateString('es-CR',{weekday:'short'}),
@@ -4138,7 +4146,7 @@ function getWaterHistory() {
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().split('T')[0];
+    const key = localDateStr(d);
     const isToday = i === 0;
     result.push({
       label: d.toLocaleDateString('es-CR',{weekday:'short'}),
@@ -4150,7 +4158,7 @@ function getWaterHistory() {
 
 // Save today's stats to history on page load
 function saveTodayToHistory() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
   
   // Cal history
   const calHist = LS.get('calHistory') || {};
@@ -4197,10 +4205,11 @@ function setupCanvas(id) {
   // Fall back to parent rect width, then to 340 if tab is still hidden
   const w = canvas.offsetWidth || Math.floor(canvas.parentElement.getBoundingClientRect().width) || 340;
   const h = parseInt(canvas.getAttribute('height')) || 160;
+  // Pin display size BEFORE changing pixel dimensions — prevents layout cascade on mobile scroll
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
   canvas.width = w * dpr;
   canvas.height = h * dpr;
-  // Do NOT override width via style — CSS width:100% on canvas.chart handles it correctly
-  canvas.style.height = h + 'px';
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
   ctx.W = w; ctx.H = h;
@@ -4507,9 +4516,11 @@ document.addEventListener('click', e => {
   }
 });
 
+let _chartResizeTimer;
 window.addEventListener('resize', () => {
   if (document.getElementById('tab-progreso')?.classList.contains('active')) {
-    renderAllCharts();
+    clearTimeout(_chartResizeTimer);
+    _chartResizeTimer = setTimeout(renderAllCharts, 250);
   }
 });
 
